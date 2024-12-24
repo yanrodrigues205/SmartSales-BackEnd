@@ -7,9 +7,36 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  createdAt DateTime @default(now())
+model Users{
+  id                String @id @default(uuid())
+  name              String
+  email             String @unique
+  phone             String @unique
+  password          String
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  TwoFactors        TwoFactors[]
+}
+
+
+model Sessions{
+  id                String @id  @default(uuid())
+  token             String @db.VarChar(300)
+  expiry            DateTime
+  TwoFactors        TwoFactors? @relation(fields: [twofactors_id], references: [id])
+  twofactors_id     String?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+}
+
+model TwoFactors{
+  id                String @id  @default(uuid())
+  Users             Users? @relation(fields: [user_id], references: [id])
+  user_id           String?
+  OPT               String    //One-Time Password
+  verify            Boolean @default(false)
+  expiry            DateTime
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  Sessions          Sessions[]
 }
